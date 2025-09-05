@@ -1,99 +1,62 @@
 # Backend Interview Challenge – Task Sync API
----
-
-## 📌 Overview
-
-This project is part of a backend interview challenge where I implemented a **Task Management API with Offline-First Synchronization**.  
-The system allows users to create, update, and delete tasks even while offline, and then sync them back to the server once connectivity is restored.  
-
-I strictly followed the provided **TODO comments** and implemented code only within those blocks.
 
 ---
 
-## 🔧 Changes I Made
+## Overview
 
-### 1. **TaskService Implementation**
-- Completed **CRUD operations**:
+This project was completed as part of a backend interview challenge.  
+The goal was to build a Task Management API with Offline-First Synchronization, where users can create, update, and delete tasks while offline, and later sync them with the server once connectivity is restored.  
+
+One of the rules of the challenge was to only work within the provided TODO blocks and not make changes outside them. I followed that strictly.
+
+---
+
+## Changes I Made
+
+### TaskService
+- Implemented all CRUD operations:
   - `createTask`
   - `updateTask`
   - `deleteTask`
   - `getTask`
   - `getAllTasks`
   - `getTasksNeedingSync`
-- Ensured every operation updates the `sync_queue` to handle offline synchronization.
-- Used UUIDs for IDs and set `sync_status = 'pending'` whenever tasks are created/modified/deleted.
-- Implemented **soft deletes** using `is_deleted = true` instead of permanent deletes.
+- Ensured every task operation also added an entry in the `sync_queue`.
+- Used UUIDs for generating IDs.
+- Defaulted `sync_status` to `pending` whenever a task was modified.
+- Implemented soft delete by marking tasks as deleted instead of removing them from the database.
 
----
-
-### 2. **SyncService Implementation**
-- Built the **sync logic** to process items in the `sync_queue`.
-- Implemented **batch processing** with configurable `SYNC_BATCH_SIZE`.
-- Added **conflict resolution** using a **last-write-wins** strategy (based on `updated_at` timestamps).
-- Updated local tasks with server-resolved data after conflicts.
-- Implemented:
+### SyncService
+- Implemented the main synchronization logic.
+- Added batch processing using `SYNC_BATCH_SIZE`.
+- Added conflict resolution using the last-write-wins strategy, based on `updated_at` timestamps.
+- Updated local tasks with server-resolved data when conflicts occurred.
+- Completed helper functions:
   - `updateSyncStatus`
   - `handleSyncError`
   - `checkConnectivity`
 
----
-
-### 3. **Routes & API Endpoints**
-- **Task Endpoints**  
-  - `POST /tasks` → Create task  
-  - `PUT /tasks/:id` → Update task  
-  - `DELETE /tasks/:id` → Soft delete task  
-  - `GET /tasks` → Fetch all tasks  
-  - `GET /tasks/:id` → Fetch single task  
-
-- **Sync Endpoints**  
-  - `POST /sync` → Trigger sync  
-  - `GET /status` → Check sync status  
-  - `POST /batch` → Process batch sync  
+### Routes
+- Implemented all task endpoints:
+  - `POST /tasks`
+  - `PUT /tasks/:id`
+  - `DELETE /tasks/:id`
+  - `GET /tasks`
+  - `GET /tasks/:id`
+- Implemented sync endpoints:
+  - `POST /sync`
+  - `GET /status`
+  - `POST /batch`
 
 ---
 
 ## Problems I Faced
 
-1. **TypeScript Errors**
-   - Type mismatch issues with SQLite results (`is_deleted`, `completed` stored as integers).  
-   - Fixed by converting database values (`0/1`) into booleans when returning tasks.
+### TypeScript Errors
+At multiple points I ran into TypeScript errors, especially around how SQLite stores values. For example, fields like `completed` and `is_deleted` are stored as integers in the database but were expected as booleans in TypeScript. I solved this by converting values properly when reading tasks.
 
-2. **Linting Errors**
-   - ESLint flagged issues such as unused imports, missing return types, and formatting inconsistencies.  
-   - Fixed by adding explicit return types, cleaning imports, and running auto-fix:  
-     ```bash
-     npm run lint -- --fix
-     ```
+### Linting Errors
+This was one of the more frustrating parts. When I first ran lint checks, I failed because of unused imports, missing explicit return types, and formatting inconsistencies. Initially, I overlooked linting until I realized it was blocking progress. After that, I carefully fixed each issue by adding types, cleaning up imports, and running auto-fix with:
 
-3. **Sync Logic Edge Cases**
-   - Handling retries for tasks stuck in `pending` state.  
-   - Added a retry mechanism with a **dead letter queue** after 3 failed attempts.
-
----
-
-## Completion Process
-
-1. **Understanding** → Fully read the challenge repo, noted all TODOs.  
-2. **Task Service** → Implemented CRUD + Sync Queue integration.  
-3. **Sync Service** → Implemented batch sync, retry logic, conflict resolution.  
-4. **Routes** → Exposed endpoints for tasks and sync.  
-5. **Debugging** → Fixed TypeScript and ESLint issues.  
-6. **Testing** → Verified sync logic offline → online workflows.  
-
----
-
-## Tech Stack
-
-- **Node.js** + **TypeScript**  
-- **Express.js**  
-- **SQLite** (local DB)  
-- **Vitest** (testing)  
-- **Axios** (API requests)  
-
----
-
-## ✅ Conclusion
-
-This challenge helped me deepen my understanding of **offline-first backend design**, **sync queues**, and **conflict resolution strategies**.  
-By carefully following the TODO instructions, debugging TypeScript and linting issues, and thoroughly testing the implementation, I was able to complete the challenge successfully.  
+```bash
+npm run lint -- --fix
