@@ -1,98 +1,99 @@
-# Backend Interview Challenge - Task Sync API
+# Backend Interview Challenge – Task Sync API
+---
 
-This is a backend developer interview challenge focused on building a sync-enabled task management API. The challenge evaluates understanding of REST APIs, data synchronization, offline-first architecture, and conflict resolution.
+## 📌 Overview
 
-## 📚 Documentation Overview
+This project is part of a backend interview challenge where I implemented a **Task Management API with Offline-First Synchronization**.  
+The system allows users to create, update, and delete tasks even while offline, and then sync them back to the server once connectivity is restored.  
 
-Please read these documents in order:
+I strictly followed the provided **TODO comments** and implemented code only within those blocks.
 
-1. **[📋 Submission Instructions](./docs/SUBMISSION_INSTRUCTIONS.md)** - How to submit your solution (MUST READ)
-2. **[📝 Requirements](./docs/REQUIREMENTS.md)** - Detailed challenge requirements and implementation tasks
-3. **[🔌 API Specification](./docs/API_SPEC.md)** - Complete API documentation with examples
-4. **[🤖 AI Usage Guidelines](./docs/AI_GUIDELINES.md)** - Guidelines for using AI tools during the challenge
+---
 
-**⚠️ Important**: DO NOT create pull requests against this repository. All submissions must be through private forks.
+## 🔧 Changes I Made
 
-## Challenge Overview
+### 1. **TaskService Implementation**
+- Completed **CRUD operations**:
+  - `createTask`
+  - `updateTask`
+  - `deleteTask`
+  - `getTask`
+  - `getAllTasks`
+  - `getTasksNeedingSync`
+- Ensured every operation updates the `sync_queue` to handle offline synchronization.
+- Used UUIDs for IDs and set `sync_status = 'pending'` whenever tasks are created/modified/deleted.
+- Implemented **soft deletes** using `is_deleted = true` instead of permanent deletes.
 
-Candidates are expected to implement a backend API that:
-- Manages tasks (CRUD operations)
-- Supports offline functionality with a sync queue
-- Handles conflict resolution when syncing
-- Provides robust error handling
+---
 
-## Project Structure
+### 2. **SyncService Implementation**
+- Built the **sync logic** to process items in the `sync_queue`.
+- Implemented **batch processing** with configurable `SYNC_BATCH_SIZE`.
+- Added **conflict resolution** using a **last-write-wins** strategy (based on `updated_at` timestamps).
+- Updated local tasks with server-resolved data after conflicts.
+- Implemented:
+  - `updateSyncStatus`
+  - `handleSyncError`
+  - `checkConnectivity`
 
-```
-backend-interview-challenge/
-├── src/
-│   ├── db/             # Database setup and configuration
-│   ├── models/         # Data models (if needed)
-│   ├── services/       # Business logic (TO BE IMPLEMENTED)
-│   ├── routes/         # API endpoints (TO BE IMPLEMENTED)
-│   ├── middleware/     # Express middleware
-│   ├── types/          # TypeScript interfaces
-│   └── server.ts       # Express server setup
-├── tests/              # Test files
-├── docs/               # Documentation
-└── package.json        # Dependencies and scripts
-```
+---
 
-## Getting Started
+### 3. **Routes & API Endpoints**
+- **Task Endpoints**  
+  - `POST /tasks` → Create task  
+  - `PUT /tasks/:id` → Update task  
+  - `DELETE /tasks/:id` → Soft delete task  
+  - `GET /tasks` → Fetch all tasks  
+  - `GET /tasks/:id` → Fetch single task  
 
-### Prerequisites
-- Node.js (v18 or higher)
-- npm or yarn
+- **Sync Endpoints**  
+  - `POST /sync` → Trigger sync  
+  - `GET /status` → Check sync status  
+  - `POST /batch` → Process batch sync  
 
-### Setup
-1. Clone the repository
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Copy environment variables:
-   ```bash
-   cp .env.example .env
-   ```
-4. Run the development server:
-   ```bash
-   npm run dev
-   ```
+---
 
-### Available Scripts
+## Problems I Faced
 
-- `npm run dev` - Start development server with hot reload
-- `npm run build` - Build TypeScript to JavaScript
-- `npm run start` - Start production server
-- `npm test` - Run tests
-- `npm run test:ui` - Run tests with UI
-- `npm run lint` - Run ESLint
-- `npm run typecheck` - Check TypeScript types
+1. **TypeScript Errors**
+   - Type mismatch issues with SQLite results (`is_deleted`, `completed` stored as integers).  
+   - Fixed by converting database values (`0/1`) into booleans when returning tasks.
 
-## Your Task
+2. **Linting Errors**
+   - ESLint flagged issues such as unused imports, missing return types, and formatting inconsistencies.  
+   - Fixed by adding explicit return types, cleaning imports, and running auto-fix:  
+     ```bash
+     npm run lint -- --fix
+     ```
 
-### Key Implementation Files
+3. **Sync Logic Edge Cases**
+   - Handling retries for tasks stuck in `pending` state.  
+   - Added a retry mechanism with a **dead letter queue** after 3 failed attempts.
 
-You'll need to implement the following services and routes:
+---
 
-- `src/services/taskService.ts` - Task CRUD operations
-- `src/services/syncService.ts` - Sync logic and conflict resolution  
-- `src/routes/tasks.ts` - REST API endpoints
-- `src/routes/sync.ts` - Sync-related endpoints
+## Completion Process
 
-### Before Submission
+1. **Understanding** → Fully read the challenge repo, noted all TODOs.  
+2. **Task Service** → Implemented CRUD + Sync Queue integration.  
+3. **Sync Service** → Implemented batch sync, retry logic, conflict resolution.  
+4. **Routes** → Exposed endpoints for tasks and sync.  
+5. **Debugging** → Fixed TypeScript and ESLint issues.  
+6. **Testing** → Verified sync logic offline → online workflows.  
 
-Ensure all of these pass:
-```bash
-npm test          # All tests must pass
-npm run lint      # No linting errors
-npm run typecheck # No TypeScript errors
-```
+---
 
-### Time Expectation
+## Tech Stack
 
-This challenge is designed to take 2-3 hours to complete.
+- **Node.js** + **TypeScript**  
+- **Express.js**  
+- **SQLite** (local DB)  
+- **Vitest** (testing)  
+- **Axios** (API requests)  
 
-## License
+---
 
-This project is for interview purposes only.
+## ✅ Conclusion
+
+This challenge helped me deepen my understanding of **offline-first backend design**, **sync queues**, and **conflict resolution strategies**.  
+By carefully following the TODO instructions, debugging TypeScript and linting issues, and thoroughly testing the implementation, I was able to complete the challenge successfully.  
