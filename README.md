@@ -7,7 +7,7 @@
 This project was completed as part of a backend interview challenge.  
 The goal was to build a Task Management API with Offline-First Synchronization, where users can create, update, and delete tasks while offline, and later sync them with the server once connectivity is restored.  
 
-The Short and brief explanation recording can be found [here.][https://drive.google.com/file/d/18mJXiSnDa5Gy08x19c04lqTXbXi-SIUh/view?usp=sharing]
+The Short and brief explanation recording can be found [here.](https://drive.google.com/file/d/18mJXiSnDa5Gy08x19c04lqTXbXi-SIUh/view?usp=sharing)
 
 ---
 
